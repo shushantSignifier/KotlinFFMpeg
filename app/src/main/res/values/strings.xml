@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FFMpeg Examples</string>
+    <string name="app_name">Signifier Video Editor</string>
 
     <!--MainActivity-->
     <string name="txt_split_video">Split Video</string>

@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KotlinFFMpeg.iml" filepath="$PROJECT_DIR$/.idea/modules/KotlinFFMpeg.iml" group="KotlinFFMpeg" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/KotlinFFMpeg-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/KotlinFFMpeg-app.iml" group="KotlinFFMpeg/app" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/ffmpeg_examples.iml" filepath="$PROJECT_DIR$/ffmpeg_examples.iml" />
     </modules>

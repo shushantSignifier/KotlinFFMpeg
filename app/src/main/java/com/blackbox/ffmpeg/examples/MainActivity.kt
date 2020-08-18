@@ -4,11 +4,12 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.blackbox.ffmpeg.examples.callback.FFMpegCallback
 import com.blackbox.ffmpeg.examples.dialogs.AudioDialog
 import com.blackbox.ffmpeg.examples.dialogs.GIFDialog
@@ -25,20 +26,24 @@ import com.blackbox.ffmpeg.examples.utils.Utils
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.util.ArrayList
 
-class MainActivity : AppCompatActivity(), FFMpegCallback {
+class MainActivity : AppCompatActivity(), FFMpegCallback, VideoAdapter.itemSelectorInterface {
 
     private val TAG = "MainActivity"
     private var context: Context? = null
 
     lateinit var audio: File
-    lateinit var audio2: File
-    lateinit var audio3: File
+    lateinit var audioToMerge: File
+    lateinit var videoTomerge: File
+    lateinit var audio2file: File
+    lateinit var audio3file: File
     lateinit var video: File
     lateinit var video2: File
     lateinit var videoSmall1: File
     lateinit var images: Array<File>
     lateinit var font: File
+    lateinit var adapter: VideoAdapter
 
     //Used to publish progress to dialog fragment
     interface ProgressPublish {
@@ -78,7 +83,7 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
             if (!isRunning()) {
                 MovieMaker.with(context!!)
-                        .setAudio(audio2)
+                        .setAudio(audio2file)
                         .setOutputPath(Utils.outputPath + "video")
                         .setOutputFileName("movie_" + System.currentTimeMillis() + ".mp4")
                         .setCallback(this@MainActivity)
@@ -118,7 +123,7 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
             if (!isRunning()) {
                 AudioTrimmer.with(context!!)
-                        .setFile(audio2)
+                        .setFile(audio2file)
                         .setStartTime("00:00:05") //Start at 5 seconds
                         .setEndTime("00:00:10") //End at 10 seconds
                         .setOutputPath(Utils.outputPath + "audio")
@@ -207,8 +212,8 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
             if (!isRunning()) {
                 AudioVideoMerger.with(context!!)
-                        .setAudioFile(audio3)
-                        .setVideoFile(video2)
+                        .setAudioFile(audioToMerge)
+                        .setVideoFile(videoTomerge)
                         .setOutputPath(Utils.outputPath + "video")
                         .setOutputFileName("merged_" + System.currentTimeMillis() + ".mp4")
                         .setCallback(this@MainActivity)
@@ -291,6 +296,19 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
             }
         }
 
+        audio1.setOnClickListener {
+            audioToMerge = audio
+        }
+
+        audio2.setOnClickListener {
+            audioToMerge = audio2file
+
+        }
+        audio3.setOnClickListener {
+            audioToMerge = audio3file
+
+        }
+
 
         //This will merge two different audio files
         btn_merge_audio.setOnClickListener {
@@ -300,8 +318,8 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
             if (!isRunning()) {
                 AudioMerger.with(context!!)
-                        .setFile1(audio2)
-                        .setFile2(audio3)
+                        .setFile1(audio2file)
+                        .setFile2(audio3file)
                         .setOutputPath(Utils.outputPath + "audio")
                         .setOutputFileName("merged_" + System.currentTimeMillis() + ".mp3")
                         .setCallback(this@MainActivity)
@@ -392,19 +410,36 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
     private fun setUpResources() {
         //Copy Audio, Video & Images from resources to Storage Directory
-        audio = Utils.copyFileToExternalStorage(R.raw.audio, "audio.mp3", applicationContext)
-        audio2 = Utils.copyFileToExternalStorage(R.raw.audio2, "audio2.mp3", applicationContext)
-        audio3 = Utils.copyFileToExternalStorage(R.raw.audio3, "audio3.mp3", applicationContext)
-        video = Utils.copyFileToExternalStorage(R.raw.video, "video.mp4", applicationContext)
+        audio = Utils.copyFileToExternalStorage(R.raw.audio, "demo.mp3", applicationContext)
+        audio2file = Utils.copyFileToExternalStorage(R.raw.audio2, "audio5.mp3", applicationContext)
+        audio3file = Utils.copyFileToExternalStorage(R.raw.audio3, "audio4.mp3", applicationContext)
+        video = Utils.copyFileToExternalStorage(R.raw.video, "dolbycanyon.mp4", applicationContext)
         video2 = Utils.copyFileToExternalStorage(R.raw.video2, "video2.mp4", applicationContext)
         videoSmall1 = Utils.copyFileToExternalStorage(R.raw.video_small_1, "video_small_1.mp4", applicationContext)
         font = Utils.copyFileToExternalStorage(R.font.roboto_black, "myFont.ttf", applicationContext)
-        images = arrayOf(
+       /* images = arrayOf(
                 Utils.copyFileToExternalStorage(R.drawable.image1, "image1.png", applicationContext)
                 , Utils.copyFileToExternalStorage(R.drawable.image2, "image2.png", applicationContext)
                 , Utils.copyFileToExternalStorage(R.drawable.image3, "image3.png", applicationContext)
                 , Utils.copyFileToExternalStorage(R.drawable.image4, "image4.png", applicationContext)
-                , Utils.copyFileToExternalStorage(R.drawable.image5, "image5.png", applicationContext))
+                , Utils.copyFileToExternalStorage(R.drawable.image5, "image5.png", applicationContext))*/
+
+        recyclerview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        adapter = VideoAdapter(getListVideo(), this, this)
+        recyclerview.adapter = adapter
+        adapter.notifyDataSetChanged()
+
+    }
+
+    private fun getListVideo(): ArrayList<File> {
+        var list = ArrayList<File>()
+        list.add(video)
+        list.add(video2)
+        list.add(videoSmall1)
+        list.add(video)
+        list.add(videoSmall1)
+        return list
     }
 
     private fun stopRunningProcess() {
@@ -415,7 +450,12 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
         return FFmpeg.getInstance(this).isFFmpegCommandRunning
     }
 
-    private fun showInProgressToast(){
+    private fun showInProgressToast() {
         Toast.makeText(this, "Operation already in progress! Try again in a while.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onItemClick(path: File) {
+        videoTomerge = path
+
     }
 }

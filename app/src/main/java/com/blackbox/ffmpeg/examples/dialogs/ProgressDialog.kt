@@ -3,9 +3,9 @@ package com.blackbox.ffmpeg.examples.dialogs
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentManager
-import android.support.v7.widget.AppCompatTextView
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
+import androidx.appcompat.widget.AppCompatTextView
 import android.widget.Button
 import com.blackbox.ffmpeg.examples.MainActivity
 import com.blackbox.ffmpeg.examples.R
